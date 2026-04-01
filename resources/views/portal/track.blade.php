@@ -17,7 +17,7 @@
                     @include('components.status-badge', ['status' => $order->status])
                 </div>
                 
-                <div class="grid grid-cols-3 gap-4 text-sm">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                     <div>
                         <p class="text-slate-500">Date Received</p>
                         <p class="font-medium text-slate-800">{{ $order->date_received->format('M d, Y') }}</p>

@@ -17,8 +17,8 @@
                     </svg>
                 </div>
                 <div>
-                    <span class="font-bold text-slate-800">Laundry</span>
-                    <span class="text-xs text-slate-500 block">Management</span>
+                    <span class="font-bold text-slate-800">goLaundry</span>
+                    <span class="text-xs text-slate-500 block">{{ auth()->user()->business?->name ?? 'Laundry Tracker' }}</span>
                 </div>
             </a>
         </div>
