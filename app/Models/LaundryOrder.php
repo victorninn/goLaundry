@@ -109,12 +109,22 @@ class LaundryOrder extends Model
     public static function generateOrderNumber($businessId): string
     {
         $prefix = 'ORD';
-        $date = now()->format('Ymd');
+        $date   = now()->format('Ymd');
+        $bizTag = str_pad($businessId, 4, '0', STR_PAD_LEFT);
+
+        // Count today's orders for this business as the starting sequence number,
+        // then loop until we land on a number not already taken (handles gaps/races).
         $count = self::where('business_id', $businessId)
             ->whereDate('created_at', today())
             ->count() + 1;
-        
-        return sprintf('%s-%s-%04d', $prefix, $date, $count);
+
+        do {
+            $candidate = sprintf('%s-%s-B%s-%04d', $prefix, $date, $bizTag, $count);
+            $exists = self::where('order_number', $candidate)->exists();
+            $count++;
+        } while ($exists);
+
+        return $candidate;
     }
 
     public function calculateTotal(): void

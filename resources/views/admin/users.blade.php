@@ -6,6 +6,25 @@
 
 @section('content')
 <div class="space-y-6">
+
+    @if(session('success'))
+        <div class="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="flex items-center gap-3 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="flex items-center justify-end">
         <a href="{{ route('super-admin.users.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,6 +44,7 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Role</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Business</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Created</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -41,10 +61,28 @@
                             </td>
                             <td class="px-6 py-4 text-slate-600">{{ $user->business?->name ?? '-' }}</td>
                             <td class="px-6 py-4 text-slate-500 text-sm">{{ $user->created_at->format('M d, Y') }}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('super-admin.users.edit', $user) }}"
+                                       class="text-sm text-teal-600 hover:text-teal-700 font-medium">
+                                        Edit
+                                    </a>
+                                    @if($user->id !== auth()->id())
+                                        <form action="{{ route('super-admin.users.destroy', $user) }}" method="POST"
+                                              onsubmit="return confirm('Delete user {{ addslashes($user->name) }}? This cannot be undone.')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-sm text-rose-600 hover:text-rose-700 font-medium">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-400">
                                 No users found
                             </td>
                         </tr>

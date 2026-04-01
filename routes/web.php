@@ -79,9 +79,19 @@ Route::middleware(['auth', 'business.access'])->group(function () {
 
 // Super Admin Routes
 Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('super-admin.')->group(function () {
+    // Businesses
     Route::get('/businesses', [SuperAdminController::class, 'businesses'])->name('businesses');
+    Route::get('/businesses/create', [SuperAdminController::class, 'createBusiness'])->name('businesses.create');
+    Route::post('/businesses', [SuperAdminController::class, 'storeBusiness'])->name('businesses.store');
+    Route::get('/businesses/{business}/edit', [SuperAdminController::class, 'editBusiness'])->name('businesses.edit');
+    Route::put('/businesses/{business}', [SuperAdminController::class, 'updateBusiness'])->name('businesses.update');
     Route::patch('/businesses/{business}/toggle', [SuperAdminController::class, 'toggleBusinessStatus'])->name('businesses.toggle');
+
+    // Users
     Route::get('/users', [SuperAdminController::class, 'users'])->name('users');
     Route::get('/users/create', [SuperAdminController::class, 'createAdmin'])->name('users.create');
     Route::post('/users', [SuperAdminController::class, 'storeAdmin'])->name('users.store');
+    Route::get('/users/{user}/edit', [SuperAdminController::class, 'editUser'])->name('users.edit');
+    Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
 });

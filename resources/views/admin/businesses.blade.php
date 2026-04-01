@@ -6,6 +6,25 @@
 
 @section('content')
 <div class="space-y-6">
+
+    @if(session('success'))
+        <div class="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <div class="flex items-center justify-end">
+        <a href="{{ route('super-admin.businesses.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Business
+        </a>
+    </div>
+
     <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -42,13 +61,19 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <form action="{{ route('super-admin.businesses.toggle', $business) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="text-sm {{ $business->is_active ? 'text-rose-600 hover:text-rose-700' : 'text-emerald-600 hover:text-emerald-700' }}">
-                                        {{ $business->is_active ? 'Deactivate' : 'Activate' }}
-                                    </button>
-                                </form>
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('super-admin.businesses.edit', $business) }}"
+                                       class="text-sm text-teal-600 hover:text-teal-700 font-medium">
+                                        Edit
+                                    </a>
+                                    <form action="{{ route('super-admin.businesses.toggle', $business) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="text-sm {{ $business->is_active ? 'text-rose-600 hover:text-rose-700' : 'text-emerald-600 hover:text-emerald-700' }} font-medium">
+                                            {{ $business->is_active ? 'Deactivate' : 'Activate' }}
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
