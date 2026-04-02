@@ -15,4 +15,5 @@ return Application::configure(basePath: dirname(__DIR__))
         'role' => \App\Http\Middleware\CheckRole::class,
         'business.access' => \App\Http\Middleware\CheckBusinessAccess::class,
     ]);
-    })->create();
+})
+    ->create();
