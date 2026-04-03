@@ -20,7 +20,7 @@ class ServiceRequest extends FormRequest
             'is_active' => 'boolean',
             'products' => 'nullable|array',
             'products.*.id' => 'exists:products,id',
-            'products.*.quantity_per_kilo' => 'numeric|min:0',
+            'products.*.quantity_per_kilo' => 'nullable|numeric|min:0',
         ];
     }
 }

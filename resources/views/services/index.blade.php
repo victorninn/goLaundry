@@ -35,7 +35,7 @@
                 
                 <div class="flex items-center justify-between mb-4">
                     <span class="text-2xl font-bold text-teal-600">₱{{ number_format($service->price_per_kilo, 2) }}</span>
-                    <span class="text-sm text-slate-500">per kilo</span>
+                    <span class="text-sm text-slate-500">per load</span>
                 </div>
 
                 @if($service->products->count() > 0)

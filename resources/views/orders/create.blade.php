@@ -73,7 +73,7 @@
                             <option value="">Select service</option>
                             @foreach($services as $service)
                                 <option value="{{ $service->id }}" data-price="{{ $service->price_per_kilo }}">
-                                    {{ $service->name }} - ₱{{ number_format($service->price_per_kilo, 2) }}/kg
+                                    {{ $service->name }} - ₱{{ number_format($service->price_per_kilo, 2) }}
                                 </option>
                             @endforeach
                         </select>
