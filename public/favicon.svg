@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Machine body -->
+  <rect x="56" y="56" width="400" height="400" rx="64" fill="#1A6EF5"/>
+  <!-- Top control panel -->
+  <rect x="88" y="88" width="336" height="110" rx="24" fill="#0F4FC4"/>
+  <!-- Power button -->
+  <circle cx="136" cy="143" r="26" fill="#5BA4FF"/>
+  <circle cx="136" cy="143" r="16" fill="#1A6EF5"/>
+  <!-- Temp button -->
+  <circle cx="200" cy="143" r="18" fill="#FF6B6B"/>
+  <!-- Display bar -->
+  <rect x="236" y="121" width="168" height="44" rx="10" fill="#1A6EF5"/>
+  <rect x="246" y="131" width="100" height="24" rx="6" fill="#5BA4FF" opacity="0.35"/>
+  <!-- Door ring outer -->
+  <circle cx="256" cy="336" r="150" fill="#0F4FC4"/>
+  <!-- Door ring inner -->
+  <circle cx="256" cy="336" r="126" fill="#1A6EF5"/>
+  <!-- Door glass -->
+  <circle cx="256" cy="336" r="110" fill="#5BA4FF" opacity="0.18"/>
+  <!-- Drum circle -->
+  <circle cx="256" cy="336" r="110" fill="none" stroke="#5BA4FF" stroke-width="3" opacity="0.4"/>
+  <!-- Drum holes -->
+  <circle cx="200" cy="284" r="12" fill="#0F4FC4" opacity="0.7"/>
+  <circle cx="312" cy="284" r="12" fill="#0F4FC4" opacity="0.7"/>
+  <circle cx="256" cy="390" r="12" fill="#0F4FC4" opacity="0.7"/>
+  <!-- Tumbling clothes -->
+  <ellipse cx="228" cy="322" rx="44" ry="28" fill="#FF6B6B" transform="rotate(-20 228 322)"/>
+  <ellipse cx="286" cy="355" rx="36" ry="22" fill="#FFD93D" transform="rotate(15 286 355)"/>
+  <!-- Bottom ledge -->
+  <rect x="56" y="432" width="400" height="36" rx="0" fill="#0F4FC4"/>
+  <rect x="56" y="450" width="400" height="30" rx="0" fill="#0A3A9E"/>
+  <!-- Feet -->
+  <rect x="96" y="462" width="70" height="28" rx="14" fill="#0A3A9E"/>
+  <rect x="346" y="462" width="70" height="28" rx="14" fill="#0A3A9E"/>
+</svg>
