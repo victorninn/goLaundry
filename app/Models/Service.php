@@ -13,12 +13,14 @@ class Service extends Model
         'business_id',
         'name',
         'description',
-        'price_per_kilo',
+        'price_per_load',
+        'load_weight',
         'is_active',
     ];
 
     protected $casts = [
-        'price_per_kilo' => 'decimal:2',
+        'price_per_load' => 'decimal:2',
+        'load_weight' => 'decimal:2',
         'is_active' => 'boolean',
     ];
 
@@ -30,7 +32,7 @@ class Service extends Model
     public function products()
     {
         return $this->belongsToMany(Product::class, 'service_product')
-            ->withPivot('quantity_per_kilo')
+            ->withPivot('quantity_per_load')
             ->withTimestamps();
     }
 
@@ -47,5 +49,10 @@ class Service extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function getFormattedPriceAttribute(): string
+    {
+        return '₱' . number_format($this->price_per_load, 2) . ' per ' . number_format($this->load_weight, 0) . 'kg load';
     }
 }

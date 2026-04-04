@@ -16,11 +16,12 @@ class ServiceRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'price_per_kilo' => 'required|numeric|min:0',
+            'price_per_load' => 'required|numeric|min:0',
+            'load_weight' => 'required|numeric|min:1',
             'is_active' => 'boolean',
             'products' => 'nullable|array',
             'products.*.id' => 'exists:products,id',
-            'products.*.quantity_per_kilo' => 'nullable|numeric|min:0',
+            'products.*.quantity_per_load' => 'nullable|numeric|min:0',
         ];
     }
 }

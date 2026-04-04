@@ -51,7 +51,7 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Order #</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Customer</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Kilos</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Loads</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Amount</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Paid</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
@@ -68,7 +68,7 @@
                                 </a>
                             </td>
                             <td class="px-6 py-4 text-slate-600">{{ $order->customer->name }}</td>
-                            <td class="px-6 py-4 text-slate-600">{{ number_format($order->total_kilos, 1) }} kg</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $order->total_loads ?? 0 }} load(s)</td>
                             <td class="px-6 py-4 text-slate-800 font-medium">₱{{ number_format($order->total_amount, 2) }}</td>
                             <td class="px-6 py-4">
                                 @if($order->isPaid())
@@ -97,7 +97,13 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
                                     </a>
-                                    @if($order->status !== 'claimed')
+                                    @if($order->status === 'claimed')
+                                        <a href="{{ route('orders.receipt', $order) }}" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg" title="Receipt">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                        </a>
+                                    @elseif($order->status !== 'claimed')
                                         <a href="{{ route('orders.edit', $order) }}" class="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg" title="Edit">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>

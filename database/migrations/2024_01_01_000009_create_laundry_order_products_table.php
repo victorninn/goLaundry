@@ -8,12 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('laundry_order_items', function (Blueprint $table) {
+        Schema::create('laundry_order_products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('laundry_order_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('service_id')->constrained()->cascadeOnDelete();
-            $table->integer('num_loads');
-            $table->decimal('price_per_load', 10, 2);
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->integer('quantity')->default(1);
+            $table->decimal('unit_price', 10, 2);
             $table->decimal('subtotal', 10, 2);
             $table->timestamps();
 
@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('laundry_order_items');
+        Schema::dropIfExists('laundry_order_products');
     }
 };

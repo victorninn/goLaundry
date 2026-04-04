@@ -10,19 +10,15 @@
     <div class="flex flex-col h-full">
         <!-- Logo -->
         <div class="p-6 border-b border-slate-100">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                  <!--<div class="w-10 h-10 bg-gradient-to-br from-teal-400 to-sky-500 rounded-xl flex items-center justify-center">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-teal-400 to-sky-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
                     </svg>
-                </div>-->
-
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center">
-                    <img src="{{ asset('favicon.svg') }}">
                 </div>
                 <div>
-                    <span class="font-bold text-slate-800">goLaundry</span>
-                    <span class="text-xs text-slate-500 block">{{ auth()->user()->business?->name ?? 'Laundry Tracker' }}</span>
+                    <span class="font-bold text-slate-800">Laundry</span>
+                    <span class="text-xs text-slate-500 block">Management</span>
                 </div>
             </a>
         </div>
@@ -73,6 +69,13 @@
             </a>
 
             <div class="pt-4 mt-4 border-t border-slate-100">
+                <a href="{{ route('license.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('license.*') ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                    <span class="font-medium">License</span>
+                </a>
+
                 <a href="{{ route('business.edit') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('business.*') ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-50' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -99,6 +102,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
                     <span class="font-medium">Users</span>
+                </a>
+
+                <a href="{{ route('super-admin.licenses.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('super-admin.licenses*') ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                    <span class="font-medium">Licenses</span>
                 </a>
             </div>
             @endif

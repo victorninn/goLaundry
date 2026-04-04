@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('service_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-            $table->decimal('quantity_per_kilo', 10, 2)->default(0); // Amount of product used per kilo of laundry
+            $table->decimal('quantity_per_load', 10, 2)->default(0);
             $table->timestamps();
 
             $table->unique(['service_id', 'product_id']);

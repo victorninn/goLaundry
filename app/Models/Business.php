@@ -14,6 +14,9 @@ class Business extends Model
         'address',
         'phone',
         'email',
+        'tin',
+        'business_registration_number',
+        'owner_name',
         'logo',
         'is_active',
     ];
@@ -47,8 +50,42 @@ class Business extends Model
         return $this->hasMany(LaundryOrder::class);
     }
 
+    public function licenses()
+    {
+        return $this->hasMany(License::class);
+    }
+
+    public function activeLicense()
+    {
+        return $this->hasOne(License::class)
+            ->where('status', License::STATUS_ACTIVE)
+            ->latest();
+    }
+
     public function owner()
     {
         return $this->hasOne(User::class)->where('role', User::ROLE_ADMIN);
+    }
+
+    public function hasValidLicense(): bool
+    {
+        $license = $this->activeLicense;
+        
+        if (!$license) {
+            return false;
+        }
+
+        // Check and update status if needed
+        $license->checkAndUpdateStatus();
+        
+        return $license->isActive();
+    }
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        if ($this->logo) {
+            return asset('storage/' . $this->logo);
+        }
+        return null;
     }
 }

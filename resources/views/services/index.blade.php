@@ -34,7 +34,7 @@
                 <p class="text-sm text-slate-500 mb-4">{{ $service->description ?? 'No description' }}</p>
                 
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-2xl font-bold text-teal-600">₱{{ number_format($service->price_per_kilo, 2) }}</span>
+                    <span class="text-2xl font-bold text-teal-600">₱{{ number_format($service->price_per_load, 2) }}</span>
                     <span class="text-sm text-slate-500">per load</span>
                 </div>
 

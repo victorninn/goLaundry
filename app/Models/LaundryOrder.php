@@ -13,7 +13,9 @@ class LaundryOrder extends Model
         'business_id',
         'customer_id',
         'order_number',
-        'total_kilos',
+        'total_loads',
+        'services_total',
+        'products_total',
         'total_amount',
         'amount_paid',
         'status',
@@ -23,7 +25,9 @@ class LaundryOrder extends Model
     ];
 
     protected $casts = [
-        'total_kilos' => 'decimal:2',
+        'total_loads' => 'integer',
+        'services_total' => 'decimal:2',
+        'products_total' => 'decimal:2',
         'total_amount' => 'decimal:2',
         'amount_paid' => 'decimal:2',
         'date_received' => 'date',
@@ -81,6 +85,11 @@ class LaundryOrder extends Model
         return $this->hasMany(LaundryOrderItem::class);
     }
 
+    public function orderProducts()
+    {
+        return $this->hasMany(LaundryOrderProduct::class);
+    }
+
     public function scopeByBusiness($query, $businessId)
     {
         return $query->where('business_id', $businessId);
@@ -89,6 +98,17 @@ class LaundryOrder extends Model
     public function scopeToday($query)
     {
         return $query->whereDate('created_at', today());
+    }
+
+    public function scopeThisWeek($query)
+    {
+        return $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+    }
+
+    public function scopeThisMonth($query)
+    {
+        return $query->whereMonth('created_at', now()->month)
+                     ->whereYear('created_at', now()->year);
     }
 
     public function scopeByDateRange($query, $startDate, $endDate)
@@ -106,31 +126,28 @@ class LaundryOrder extends Model
         return $this->amount_paid >= $this->total_amount;
     }
 
+    public function isClaimed(): bool
+    {
+        return $this->status === self::STATUS_CLAIMED;
+    }
+
     public static function generateOrderNumber($businessId): string
     {
         $prefix = 'ORD';
-        $date   = now()->format('Ymd');
-        $bizTag = str_pad($businessId, 4, '0', STR_PAD_LEFT);
-
-        // Count today's orders for this business as the starting sequence number,
-        // then loop until we land on a number not already taken (handles gaps/races).
+        $date = now()->format('Ymd');
         $count = self::where('business_id', $businessId)
             ->whereDate('created_at', today())
             ->count() + 1;
-
-        do {
-            $candidate = sprintf('%s-%s-B%s-%04d', $prefix, $date, $bizTag, $count);
-            $exists = self::where('order_number', $candidate)->exists();
-            $count++;
-        } while ($exists);
-
-        return $candidate;
+        
+        return sprintf('%s-B%d-%s-%04d', $prefix, $businessId, $date, $count);
     }
 
     public function calculateTotal(): void
     {
-        $this->total_amount = $this->items->sum('subtotal');
-        $this->total_kilos = $this->items->sum('kilos');
+        $this->services_total = $this->items->sum('subtotal');
+        $this->products_total = $this->orderProducts->sum('subtotal');
+        $this->total_amount = $this->services_total + $this->products_total;
+        $this->total_loads = $this->items->sum('num_loads');
         $this->save();
     }
 }

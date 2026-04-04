@@ -12,14 +12,14 @@ class LaundryOrderItem extends Model
     protected $fillable = [
         'laundry_order_id',
         'service_id',
-        'kilos',
-        'price_per_kilo',
+        'num_loads',
+        'price_per_load',
         'subtotal',
     ];
 
     protected $casts = [
-        'kilos' => 'decimal:2',
-        'price_per_kilo' => 'decimal:2',
+        'num_loads' => 'integer',
+        'price_per_load' => 'decimal:2',
         'subtotal' => 'decimal:2',
     ];
 
@@ -36,11 +36,11 @@ class LaundryOrderItem extends Model
     protected static function booted()
     {
         static::creating(function ($item) {
-            $item->subtotal = $item->kilos * $item->price_per_kilo;
+            $item->subtotal = $item->num_loads * $item->price_per_load;
         });
 
         static::updating(function ($item) {
-            $item->subtotal = $item->kilos * $item->price_per_kilo;
+            $item->subtotal = $item->num_loads * $item->price_per_load;
         });
 
         static::saved(function ($item) {
@@ -56,8 +56,10 @@ class LaundryOrderItem extends Model
     {
         $service = $this->service;
         foreach ($service->products as $product) {
-            $quantityToDeduct = $product->pivot->quantity_per_kilo * $this->kilos;
-            $product->deductStock($quantityToDeduct);
+            $quantityToDeduct = ($product->pivot->quantity_per_load ?? 0) * $this->num_loads;
+            if ($quantityToDeduct > 0) {
+                $product->deductStock($quantityToDeduct);
+            }
         }
     }
 }

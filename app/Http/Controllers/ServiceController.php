@@ -38,12 +38,11 @@ class ServiceController extends Controller
 
         $service = Service::create($data);
 
-        // Attach products with quantities
         if ($request->has('products')) {
             foreach ($request->products as $productData) {
-                if (!empty($productData['id']) && !empty($productData['quantity_per_kilo'])) {
+                if (!empty($productData['id']) && !empty($productData['quantity_per_load'])) {
                     $service->products()->attach($productData['id'], [
-                        'quantity_per_kilo' => $productData['quantity_per_kilo']
+                        'quantity_per_load' => $productData['quantity_per_load']
                     ]);
                 }
             }
@@ -69,13 +68,12 @@ class ServiceController extends Controller
 
         $service->update($request->validated());
 
-        // Sync products
         $syncData = [];
         if ($request->has('products')) {
             foreach ($request->products as $productData) {
-                if (!empty($productData['id']) && !empty($productData['quantity_per_kilo'])) {
+                if (!empty($productData['id']) && !empty($productData['quantity_per_load'])) {
                     $syncData[$productData['id']] = [
-                        'quantity_per_kilo' => $productData['quantity_per_kilo']
+                        'quantity_per_load' => $productData['quantity_per_load']
                     ];
                 }
             }
@@ -90,7 +88,6 @@ class ServiceController extends Controller
     {
         $this->authorizeBusinessAccess($service);
 
-        // Check if service has orders
         if ($service->laundryOrderItems()->exists()) {
             return back()->with('error', 'Cannot delete service with existing orders.');
         }

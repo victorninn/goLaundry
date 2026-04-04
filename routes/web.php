@@ -4,11 +4,14 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PortalLoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\BusinessLicenseController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaundryOrderController;
+use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SuperAdminController;
@@ -46,11 +49,11 @@ Route::prefix('portal')->name('portal.')->group(function () {
 });
 
 // Authenticated Routes
-Route::middleware(['auth', 'business.access'])->group(function () {
+Route::middleware(['auth', 'business.access', 'license.check'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Customers
+    // Customers (will be disabled if license expired - handled in view)
     Route::resource('customers', CustomerController::class);
 
     // Services
@@ -65,10 +68,22 @@ Route::middleware(['auth', 'business.access'])->group(function () {
     Route::patch('/orders/{order}/status', [LaundryOrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::post('/orders/{order}/payment', [LaundryOrderController::class, 'recordPayment'])->name('orders.payment');
 
+    // Receipts
+    Route::get('/orders/{order}/receipt', [ReceiptController::class, 'show'])->name('orders.receipt');
+    Route::get('/orders/{order}/receipt/pdf', [ReceiptController::class, 'pdf'])->name('orders.receipt.pdf');
+
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
-    Route::get('/reports/range', [ReportController::class, 'dateRange'])->name('reports.range');
+    Route::get('/reports/weekly', [ReportController::class, 'weekly'])->name('reports.weekly');
+    Route::get('/reports/weekly/pdf', [ReportController::class, 'weeklyPdf'])->name('reports.weekly.pdf');
+    Route::get('/reports/monthly', [ReportController::class, 'monthly'])->name('reports.monthly');
+    Route::get('/reports/monthly/pdf', [ReportController::class, 'monthlyPdf'])->name('reports.monthly.pdf');
+
+    // License (Business side)
+    Route::get('/license', [BusinessLicenseController::class, 'index'])->name('license.index');
+    Route::post('/license/activate', [BusinessLicenseController::class, 'activate'])->name('license.activate');
+    Route::get('/license/status', [BusinessLicenseController::class, 'checkStatus'])->name('license.status');
 
     // Business Settings (Admin only)
     Route::middleware('role:admin')->group(function () {
@@ -94,4 +109,12 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::get('/users/{user}/edit', [SuperAdminController::class, 'editUser'])->name('users.edit');
     Route::put('/users/{user}', [SuperAdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
+
+    // Licenses
+    Route::get('/licenses', [LicenseController::class, 'index'])->name('licenses.index');
+    Route::get('/licenses/create', [LicenseController::class, 'create'])->name('licenses.create');
+    Route::post('/licenses', [LicenseController::class, 'store'])->name('licenses.store');
+    Route::post('/licenses/generate', [LicenseController::class, 'generateKey'])->name('licenses.generate');
+    Route::post('/licenses/{license}/renew', [LicenseController::class, 'renew'])->name('licenses.renew');
+    Route::delete('/licenses/{license}', [LicenseController::class, 'destroy'])->name('licenses.destroy');
 });

@@ -1,10 +1,32 @@
 <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
     <div class="flex items-center justify-between px-4 lg:px-6 py-4">
-        <div class="lg:pl-0 pl-12">
-            <h1 class="text-lg font-semibold text-slate-800">@yield('page-title', 'Dashboard')</h1>
-            @hasSection('page-description')
-                <p class="text-sm text-slate-500">@yield('page-description')</p>
-            @endif
+        <div class="lg:pl-0 pl-12 flex items-center gap-3">
+            @unless(auth()->user()->isSuperAdmin())
+                @php $business = auth()->user()->business; @endphp
+                @if($business && $business->logo_url)
+                    <img src="{{ $business->logo_url }}" alt="{{ $business->name }}" class="w-10 h-10 rounded-lg object-cover border border-slate-200">
+                @endif
+                @if($business)
+                    <div>
+                        <h1 class="text-lg font-semibold text-slate-800">{{ $business->name }}</h1>
+                        <p class="text-xs text-slate-500">@yield('page-title', 'Dashboard')</p>
+                    </div>
+                @else
+                    <div>
+                        <h1 class="text-lg font-semibold text-slate-800">@yield('page-title', 'Dashboard')</h1>
+                        @hasSection('page-description')
+                            <p class="text-sm text-slate-500">@yield('page-description')</p>
+                        @endif
+                    </div>
+                @endif
+            @else
+                <div>
+                    <h1 class="text-lg font-semibold text-slate-800">@yield('page-title', 'Dashboard')</h1>
+                    @hasSection('page-description')
+                        <p class="text-sm text-slate-500">@yield('page-description')</p>
+                    @endif
+                </div>
+            @endunless
         </div>
 
         <div class="flex items-center gap-4">

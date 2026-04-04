@@ -2,12 +2,12 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Daily Report - {{ $date }}</title>
+    <title>Monthly Report - {{ $monthStart->format('F Y') }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DejaVu Sans', sans-serif; font-size: 12px; color: #333; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #0d9488; padding-bottom: 20px; }
-        .header h1 { font-size: 24px; color: #0d9488; margin-bottom: 5px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #7c3aed; padding-bottom: 20px; }
+        .header h1 { font-size: 24px; color: #7c3aed; margin-bottom: 5px; }
         .header p { color: #666; }
         .summary { display: table; width: 100%; margin-bottom: 30px; }
         .summary-item { display: table-cell; text-align: center; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; }
@@ -16,7 +16,7 @@
         .summary-item.paid .value { color: #059669; }
         .summary-item.balance .value { color: #dc2626; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th { background: #0d9488; color: white; padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
+        th { background: #7c3aed; color: white; padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
         td { padding: 10px 8px; border-bottom: 1px solid #e2e8f0; }
         tr:nth-child(even) { background: #f8fafc; }
         .text-right { text-align: right; }
@@ -36,7 +36,7 @@
         @if($business->tin)
             <p>TIN: {{ $business->tin }}</p>
         @endif
-        <p>Daily Report - {{ \Carbon\Carbon::parse($date)->format('F d, Y') }}</p>
+        <p>Monthly Report: {{ $monthStart->format('F Y') }}</p>
     </div>
 
     <div class="summary">
@@ -67,11 +67,11 @@
             <tr>
                 <th>Order #</th>
                 <th>Customer</th>
-                <th>Services</th>
                 <th class="text-right">Loads</th>
                 <th class="text-right">Amount</th>
                 <th class="text-right">Paid</th>
                 <th>Status</th>
+                <th>Date</th>
             </tr>
         </thead>
         <tbody>
@@ -79,17 +79,15 @@
                 <tr>
                     <td>{{ $order->order_number }}</td>
                     <td>{{ $order->customer->name }}</td>
-                    <td>{{ $order->items->pluck('service.name')->join(', ') }}</td>
                     <td class="text-right">{{ $order->total_loads ?? 0 }}</td>
                     <td class="text-right">₱{{ number_format($order->total_amount, 2) }}</td>
                     <td class="text-right">₱{{ number_format($order->amount_paid, 2) }}</td>
-                    <td>
-                        <span class="status status-{{ $order->status }}">{{ ucfirst($order->status) }}</span>
-                    </td>
+                    <td><span class="status status-{{ $order->status }}">{{ ucfirst($order->status) }}</span></td>
+                    <td>{{ $order->created_at->format('M d') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 30px;">No orders for this date</td>
+                    <td colspan="7" style="text-align: center; padding: 30px;">No orders for this month</td>
                 </tr>
             @endforelse
         </tbody>

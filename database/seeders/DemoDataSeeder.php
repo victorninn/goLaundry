@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\Customer;
 use App\Models\LaundryOrder;
 use App\Models\LaundryOrderItem;
+use App\Models\License;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
@@ -19,7 +20,7 @@ class DemoDataSeeder extends Seeder
         // Create Super Admin
         User::create([
             'name' => 'Super Admin',
-            'email' => 'superadmin@laundry.com',
+            'email' => 'superadmin@example.com',
             'password' => Hash::make('password123'),
             'role' => 'super_admin',
             'business_id' => null,
@@ -31,7 +32,20 @@ class DemoDataSeeder extends Seeder
             'address' => '123 Main Street, City Center',
             'phone' => '09123456789',
             'email' => 'freshclean@laundry.com',
+            'tin' => '123-456-789-000',
+            'business_registration_number' => 'REG-2024-001',
+            'owner_name' => 'John Admin',
             'is_active' => true,
+        ]);
+
+        // Create a Lifetime License for the demo business
+        License::create([
+            'business_id' => $business->id,
+            'license_key' => License::generateLicenseKey(),
+            'subscription_type' => License::TYPE_LIFETIME,
+            'expiration_date' => null,
+            'status' => License::STATUS_ACTIVE,
+            'activated_at' => now(),
         ]);
 
         // Create Admin for the business
@@ -85,41 +99,45 @@ class DemoDataSeeder extends Seeder
             $createdProducts[] = Product::create($productData);
         }
 
-        // Create Services
+        // Create Services (per-load pricing)
         $services = [
             [
                 'name' => 'Regular Wash',
                 'description' => 'Standard washing service',
-                'price_per_kilo' => 35.00,
+                'price_per_load' => 150.00,
+                'load_weight' => 7,
                 'products' => [
-                    ['index' => 0, 'qty' => 30], // Detergent
-                    ['index' => 1, 'qty' => 15], // Conditioner
+                    ['index' => 0, 'qty' => 30],
+                    ['index' => 1, 'qty' => 15],
                 ],
             ],
             [
                 'name' => 'Premium Wash',
                 'description' => 'Premium washing with fabric care',
-                'price_per_kilo' => 50.00,
+                'price_per_load' => 200.00,
+                'load_weight' => 7,
                 'products' => [
                     ['index' => 0, 'qty' => 40],
                     ['index' => 1, 'qty' => 25],
-                    ['index' => 3, 'qty' => 10], // Stain remover
+                    ['index' => 3, 'qty' => 10],
                 ],
             ],
             [
                 'name' => 'Whites Only',
                 'description' => 'Specialized service for white clothes',
-                'price_per_kilo' => 45.00,
+                'price_per_load' => 180.00,
+                'load_weight' => 7,
                 'products' => [
                     ['index' => 0, 'qty' => 35],
-                    ['index' => 2, 'qty' => 20], // Bleach
+                    ['index' => 2, 'qty' => 20],
                     ['index' => 1, 'qty' => 15],
                 ],
             ],
             [
                 'name' => 'Dry Clean',
                 'description' => 'Professional dry cleaning',
-                'price_per_kilo' => 80.00,
+                'price_per_load' => 350.00,
+                'load_weight' => 5,
                 'products' => [],
             ],
         ];
@@ -128,15 +146,14 @@ class DemoDataSeeder extends Seeder
         foreach ($services as $serviceData) {
             $productAssignments = $serviceData['products'];
             unset($serviceData['products']);
-            
+
             $serviceData['business_id'] = $business->id;
             $service = Service::create($serviceData);
             $createdServices[] = $service;
 
-            // Attach products
             foreach ($productAssignments as $assignment) {
                 $service->products()->attach($createdProducts[$assignment['index']]->id, [
-                    'quantity_per_kilo' => $assignment['qty']
+                    'quantity_per_load' => $assignment['qty']
                 ]);
             }
         }
@@ -156,25 +173,28 @@ class DemoDataSeeder extends Seeder
             $createdCustomers[] = Customer::create($customerData);
         }
 
-        // Create Sample Orders
+        // Create Sample Orders (per-load)
         $statuses = ['pending', 'washing', 'drying', 'ready', 'claimed'];
-        
+
         for ($i = 0; $i < 15; $i++) {
             $customer = $createdCustomers[array_rand($createdCustomers)];
             $service = $createdServices[array_rand($createdServices)];
-            $kilos = rand(2, 10) + (rand(0, 9) / 10);
+            $numLoads = rand(1, 4);
             $status = $statuses[array_rand($statuses)];
-            
+            $servicesTotal = $numLoads * $service->price_per_load;
+
             $dateReceived = now()->subDays(rand(0, 7));
             $dateRelease = $dateReceived->copy()->addDays(rand(1, 3));
 
             $order = LaundryOrder::create([
                 'business_id' => $business->id,
                 'customer_id' => $customer->id,
-                'order_number' => 'ORD-' . now()->format('Ymd') . '-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
-                'total_kilos' => $kilos,
-                'total_amount' => $kilos * $service->price_per_kilo,
-                'amount_paid' => $status === 'claimed' ? $kilos * $service->price_per_kilo : rand(0, 1) * ($kilos * $service->price_per_kilo),
+                'order_number' => LaundryOrder::generateOrderNumber($business->id),
+                'total_loads' => $numLoads,
+                'services_total' => $servicesTotal,
+                'products_total' => 0,
+                'total_amount' => $servicesTotal,
+                'amount_paid' => $status === 'claimed' ? $servicesTotal : (rand(0, 1) * $servicesTotal),
                 'status' => $status,
                 'date_received' => $dateReceived,
                 'date_release' => $dateRelease,
@@ -184,14 +204,15 @@ class DemoDataSeeder extends Seeder
             LaundryOrderItem::create([
                 'laundry_order_id' => $order->id,
                 'service_id' => $service->id,
-                'kilos' => $kilos,
-                'price_per_kilo' => $service->price_per_kilo,
-                'subtotal' => $kilos * $service->price_per_kilo,
+                'num_loads' => $numLoads,
+                'price_per_load' => $service->price_per_load,
+                'subtotal' => $servicesTotal,
             ]);
         }
 
         $this->command->info('Demo data seeded successfully!');
-        $this->command->info('Super Admin: superadmin@laundry.com / password123');
+        $this->command->info('');
+        $this->command->info('Super Admin: superadmin@example.com / password123');
         $this->command->info('Admin: admin@freshclean.com / password123');
         $this->command->info('Portal: Use customer phone (e.g., 09171234567)');
     }

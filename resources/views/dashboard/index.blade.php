@@ -1,11 +1,38 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard')
-@section('page-title', ' Dashboard')
+@section('page-title', 'Dashboard')
 @section('page-description', 'Overview of your laundry business')
 
 @section('content')
 <div class="space-y-6">
+    <!-- Business Header with Logo -->
+    <div class="bg-white rounded-xl border border-slate-200 p-6">
+        <div class="flex items-center gap-4">
+            @if($business && $business->logo_url)
+                <img src="{{ $business->logo_url }}" alt="{{ $business->name }} Logo" class="w-16 h-16 rounded-xl object-cover border border-slate-200">
+            @else
+                <div class="w-16 h-16 rounded-xl bg-teal-100 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                </div>
+            @endif
+            <div class="flex-1">
+                <h2 class="text-xl font-bold text-slate-800">{{ $business->name ?? 'My Business' }}</h2>
+                @if($business && $business->address)
+                    <p class="text-sm text-slate-500">{{ $business->address }}</p>
+                @endif
+            </div>
+            <a href="{{ route('orders.create') }}" class="inline-flex items-center gap-2 px-5 py-3 bg-teal-500 text-white font-medium rounded-xl hover:bg-teal-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                New Order
+            </a>
+        </div>
+    </div>
+
     <!-- Stats Grid -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white rounded-xl p-6 border border-slate-200">
@@ -164,7 +191,7 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Order #</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Customer</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Kilos</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Loads</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Amount</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Date</th>
@@ -179,7 +206,7 @@
                                 </a>
                             </td>
                             <td class="px-6 py-4 text-slate-600">{{ $order->customer->name }}</td>
-                            <td class="px-6 py-4 text-slate-600">{{ number_format($order->total_kilos, 1) }} kg</td>
+                            <td class="px-6 py-4 text-slate-600">{{ $order->total_loads ?? 0 }}</td>
                             <td class="px-6 py-4 text-slate-800 font-medium">₱{{ number_format($order->total_amount, 2) }}</td>
                             <td class="px-6 py-4">
                                 @include('components.status-badge', ['status' => $order->status])

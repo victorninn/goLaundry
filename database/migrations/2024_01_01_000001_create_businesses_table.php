@@ -14,6 +14,9 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
+            $table->string('tin')->nullable();
+            $table->string('business_registration_number')->nullable();
+            $table->string('owner_name')->nullable();
             $table->string('logo')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

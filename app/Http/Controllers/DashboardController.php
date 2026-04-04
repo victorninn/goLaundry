@@ -15,35 +15,31 @@ class DashboardController extends Controller
         $user = auth()->user();
         $businessId = $user->business_id;
 
-        // For super admin, show overview of all businesses
         if ($user->isSuperAdmin()) {
             return $this->superAdminDashboard();
         }
 
-        // Today's stats
+        $business = $user->business;
+
         $todayOrders = LaundryOrder::byBusiness($businessId)->today()->count();
         $todayRevenue = LaundryOrder::byBusiness($businessId)->today()->sum('amount_paid');
         
-        // Pending orders by status
         $ordersByStatus = LaundryOrder::byBusiness($businessId)
             ->whereNotIn('status', ['claimed', 'cancelled'])
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status');
 
-        // Recent orders
         $recentOrders = LaundryOrder::byBusiness($businessId)
             ->with('customer')
             ->latest()
             ->take(10)
             ->get();
 
-        // Low stock products
         $lowStockProducts = Product::byBusiness($businessId)
             ->lowStock()
             ->get();
 
-        // Monthly stats
         $monthlyOrders = LaundryOrder::byBusiness($businessId)
             ->whereMonth('created_at', now()->month)
             ->count();
@@ -51,11 +47,11 @@ class DashboardController extends Controller
             ->whereMonth('created_at', now()->month)
             ->sum('amount_paid');
 
-        // Customers count
         $customersCount = Customer::byBusiness($businessId)->count();
         $servicesCount = Service::byBusiness($businessId)->active()->count();
 
         return view('dashboard.index', compact(
+            'business',
             'todayOrders',
             'todayRevenue',
             'ordersByStatus',

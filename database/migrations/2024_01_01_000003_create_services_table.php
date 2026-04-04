@@ -13,7 +13,8 @@ return new class extends Migration
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('price_per_kilo', 10, 2);
+            $table->decimal('price_per_load', 10, 2);
+            $table->decimal('load_weight', 10, 2)->default(7);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

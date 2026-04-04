@@ -13,7 +13,9 @@ return new class extends Migration
             $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->string('order_number')->unique();
-            $table->decimal('total_kilos', 10, 2)->default(0);
+            $table->integer('total_loads')->default(0);
+            $table->decimal('services_total', 10, 2)->default(0);
+            $table->decimal('products_total', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2)->default(0);
             $table->decimal('amount_paid', 10, 2)->default(0);
             $table->enum('status', ['pending', 'washing', 'drying', 'folding', 'ready', 'claimed', 'cancelled'])->default('pending');

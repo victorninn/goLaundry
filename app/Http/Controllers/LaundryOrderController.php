@@ -6,6 +6,8 @@ use App\Http\Requests\LaundryOrderRequest;
 use App\Models\Customer;
 use App\Models\LaundryOrder;
 use App\Models\LaundryOrderItem;
+use App\Models\LaundryOrderProduct;
+use App\Models\Product;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,12 +24,10 @@ class LaundryOrderController extends Controller
         $query = LaundryOrder::byBusiness($this->getBusinessId())
             ->with('customer');
 
-        // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Filter by date range
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
@@ -35,7 +35,6 @@ class LaundryOrderController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        // Search by order number or customer name
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -56,43 +55,101 @@ class LaundryOrderController extends Controller
     {
         $customers = Customer::byBusiness($this->getBusinessId())->get();
         $services = Service::byBusiness($this->getBusinessId())->active()->get();
+        $products = Product::byBusiness($this->getBusinessId())->where('quantity', '>', 0)->get();
 
-        return view('orders.create', compact('customers', 'services'));
+        return view('orders.create', compact('customers', 'services', 'products'));
     }
 
-    public function store(LaundryOrderRequest $request)
+    public function store(Request $request)
     {
         $businessId = $this->getBusinessId();
 
+        $validated = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'date_received' => 'required|date',
+            'date_release' => 'nullable|date|after_or_equal:date_received',
+            'notes' => 'nullable|string|max:1000',
+            'amount_paid' => 'nullable|numeric|min:0',
+            'status' => 'nullable|in:pending,washing,drying,folding,ready,claimed,cancelled',
+            'items' => 'required|array|min:1',
+            'items.*.service_id' => 'required|exists:services,id',
+            'items.*.num_loads' => 'required|integer|min:1',
+            'order_products' => 'nullable|array',
+            'order_products.*.product_id' => 'nullable|exists:products,id',
+            'order_products.*.quantity' => 'nullable|integer|min:1',
+        ]);
+
         DB::beginTransaction();
         try {
-            // Create order
             $order = LaundryOrder::create([
                 'business_id' => $businessId,
-                'customer_id' => $request->customer_id,
+                'customer_id' => $validated['customer_id'],
                 'order_number' => LaundryOrder::generateOrderNumber($businessId),
-                'date_received' => $request->date_received,
-                'date_release' => $request->date_release,
-                'notes' => $request->notes,
-                'amount_paid' => $request->amount_paid ?? 0,
-                'status' => $request->status ?? 'pending',
+                'date_received' => $validated['date_received'],
+                'date_release' => $validated['date_release'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'amount_paid' => $validated['amount_paid'] ?? 0,
+                'status' => $validated['status'] ?? 'pending',
             ]);
 
-            // Create order items
-            foreach ($request->items as $item) {
+            $servicesTotal = 0;
+            $productsTotal = 0;
+            $totalLoads = 0;
+
+            // Create order items (services) - per load pricing
+            foreach ($validated['items'] as $item) {
                 $service = Service::find($item['service_id']);
+                $numLoads = (int) $item['num_loads'];
+                $subtotal = $numLoads * $service->price_per_load;
                 
-                $orderItem = LaundryOrderItem::create([
+                LaundryOrderItem::create([
                     'laundry_order_id' => $order->id,
                     'service_id' => $item['service_id'],
-                    'kilos' => $item['kilos'],
-                    'price_per_kilo' => $service->price_per_kilo,
-                    'subtotal' => $item['kilos'] * $service->price_per_kilo,
+                    'num_loads' => $numLoads,
+                    'price_per_load' => $service->price_per_load,
+                    'subtotal' => $subtotal,
                 ]);
 
-                // Deduct product stock
-                $orderItem->deductProductStock();
+                $servicesTotal += $subtotal;
+                $totalLoads += $numLoads;
             }
+
+            // Create order products
+            if (!empty($validated['order_products'])) {
+                foreach ($validated['order_products'] as $productItem) {
+                    if (empty($productItem['product_id']) || empty($productItem['quantity'])) {
+                        continue;
+                    }
+                    
+                    $product = Product::find($productItem['product_id']);
+                    
+                    if ($product->quantity < $productItem['quantity']) {
+                        throw new \Exception("Insufficient stock for {$product->name}");
+                    }
+                    
+                    $subtotal = $productItem['quantity'] * $product->price;
+                    
+                    LaundryOrderProduct::create([
+                        'laundry_order_id' => $order->id,
+                        'product_id' => $productItem['product_id'],
+                        'quantity' => $productItem['quantity'],
+                        'unit_price' => $product->price,
+                        'subtotal' => $subtotal,
+                    ]);
+
+                    $product->deductStock($productItem['quantity']);
+                    
+                    $productsTotal += $subtotal;
+                }
+            }
+
+            // Update order totals
+            $order->update([
+                'total_loads' => $totalLoads,
+                'services_total' => $servicesTotal,
+                'products_total' => $productsTotal,
+                'total_amount' => $servicesTotal + $productsTotal,
+            ]);
 
             DB::commit();
 
@@ -110,7 +167,7 @@ class LaundryOrderController extends Controller
     {
         $this->authorizeBusinessAccess($order);
 
-        $order->load(['customer', 'items.service']);
+        $order->load(['customer', 'items.service', 'orderProducts.product']);
 
         return view('orders.show', compact('order'));
     }
@@ -123,12 +180,13 @@ class LaundryOrderController extends Controller
             return back()->with('error', 'Cannot edit claimed orders.');
         }
 
-        $order->load('items.service');
+        $order->load(['items.service', 'orderProducts.product']);
         $customers = Customer::byBusiness($this->getBusinessId())->get();
         $services = Service::byBusiness($this->getBusinessId())->active()->get();
+        $products = Product::byBusiness($this->getBusinessId())->get();
         $statuses = LaundryOrder::getStatuses();
 
-        return view('orders.edit', compact('order', 'customers', 'services', 'statuses'));
+        return view('orders.edit', compact('order', 'customers', 'services', 'products', 'statuses'));
     }
 
     public function update(Request $request, LaundryOrder $order)

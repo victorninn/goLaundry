@@ -14,7 +14,14 @@
             </div>
             <div class="flex items-center gap-3">
                 @include('components.status-badge', ['status' => $order->status])
-                @if($order->status !== 'claimed')
+                @if($order->status === 'claimed')
+                    <a href="{{ route('orders.receipt', $order) }}" class="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors inline-flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        View Receipt
+                    </a>
+                @else
                     <a href="{{ route('orders.edit', $order) }}" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">
                         Edit Order
                     </a>
@@ -37,8 +44,8 @@
                 <p class="font-medium text-slate-800">{{ $order->date_release?->format('F d, Y') ?? 'Not set' }}</p>
             </div>
             <div>
-                <p class="text-sm text-slate-500 mb-1">Total Weight</p>
-                <p class="font-medium text-slate-800">{{ number_format($order->total_kilos, 2) }} kg</p>
+                <p class="text-sm text-slate-500 mb-1">Total Loads</p>
+                <p class="font-medium text-slate-800">{{ $order->total_loads ?? $order->items->sum('num_loads') }} load(s)</p>
             </div>
         </div>
 
@@ -50,18 +57,18 @@
         @endif
     </div>
 
-    <!-- Order Items -->
+    <!-- Services -->
     <div class="bg-white rounded-xl border border-slate-200">
         <div class="p-6 border-b border-slate-100">
-            <h3 class="font-semibold text-slate-800">Services</h3>
+            <h3 class="font-semibold text-slate-800">Services (Laundry)</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-slate-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Service</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Kilos</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Price/kg</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Loads</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Price/Load</th>
                         <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Subtotal</th>
                     </tr>
                 </thead>
@@ -69,19 +76,64 @@
                     @foreach($order->items as $item)
                         <tr>
                             <td class="px-6 py-4 font-medium text-slate-800">{{ $item->service->name }}</td>
-                            <td class="px-6 py-4 text-right text-slate-600">{{ number_format($item->kilos, 2) }}</td>
-                            <td class="px-6 py-4 text-right text-slate-600">₱{{ number_format($item->price_per_kilo, 2) }}</td>
+                            <td class="px-6 py-4 text-right text-slate-600">{{ $item->num_loads }}</td>
+                            <td class="px-6 py-4 text-right text-slate-600">₱{{ number_format($item->price_per_load, 2) }}</td>
                             <td class="px-6 py-4 text-right font-medium text-slate-800">₱{{ number_format($item->subtotal, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
                 <tfoot class="bg-slate-50">
                     <tr>
-                        <td colspan="3" class="px-6 py-4 text-right font-semibold text-slate-700">Total</td>
-                        <td class="px-6 py-4 text-right text-xl font-bold text-teal-600">₱{{ number_format($order->total_amount, 2) }}</td>
+                        <td colspan="3" class="px-6 py-3 text-right font-semibold text-slate-700">Services Total</td>
+                        <td class="px-6 py-3 text-right font-bold text-slate-800">₱{{ number_format($order->services_total ?? $order->items->sum('subtotal'), 2) }}</td>
                     </tr>
                 </tfoot>
             </table>
+        </div>
+    </div>
+
+    <!-- Products -->
+    @if($order->orderProducts->count() > 0)
+    <div class="bg-white rounded-xl border border-slate-200">
+        <div class="p-6 border-b border-slate-100">
+            <h3 class="font-semibold text-slate-800">Products</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-sky-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Product</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Quantity</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Unit Price</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach($order->orderProducts as $orderProduct)
+                        <tr>
+                            <td class="px-6 py-4 font-medium text-slate-800">{{ $orderProduct->product->name }}</td>
+                            <td class="px-6 py-4 text-right text-slate-600">{{ $orderProduct->quantity }}</td>
+                            <td class="px-6 py-4 text-right text-slate-600">₱{{ number_format($orderProduct->unit_price, 2) }}</td>
+                            <td class="px-6 py-4 text-right font-medium text-slate-800">₱{{ number_format($orderProduct->subtotal, 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot class="bg-sky-50">
+                    <tr>
+                        <td colspan="3" class="px-6 py-3 text-right font-semibold text-slate-700">Products Total</td>
+                        <td class="px-6 py-3 text-right font-bold text-slate-800">₱{{ number_format($order->products_total ?? $order->orderProducts->sum('subtotal'), 2) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- Grand Total -->
+    <div class="bg-gradient-to-r from-teal-500 to-sky-500 rounded-xl p-6 text-white">
+        <div class="flex items-center justify-between">
+            <span class="text-lg font-medium opacity-90">Grand Total</span>
+            <span class="text-3xl font-bold">₱{{ number_format($order->total_amount, 2) }}</span>
         </div>
     </div>
 
@@ -123,17 +175,27 @@
     <!-- Actions -->
     <div class="flex items-center justify-between">
         <a href="{{ route('orders.index') }}" class="text-slate-600 hover:text-slate-800">
-            ← Back to Orders
+            &larr; Back to Orders
         </a>
-        @if(in_array($order->status, ['pending', 'cancelled']))
-            <form action="{{ route('orders.destroy', $order) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="px-4 py-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
-                    Delete Order
-                </button>
-            </form>
-        @endif
+        <div class="flex items-center gap-3">
+            @if($order->status === 'claimed')
+                <a href="{{ route('orders.receipt.pdf', $order) }}" class="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors inline-flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Download PDF Receipt
+                </a>
+            @endif
+            @if(in_array($order->status, ['pending', 'cancelled']))
+                <form action="{{ route('orders.destroy', $order) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                        Delete Order
+                    </button>
+                </form>
+            @endif
+        </div>
     </div>
 </div>
 @endsection
