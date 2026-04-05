@@ -30,7 +30,7 @@
 
     <!-- Date Selector -->
     <div class="bg-white rounded-xl border border-slate-200 p-4">
-        <form action="{{ route('reports.index') }}" method="GET" class="flex items-center gap-4">
+        <form action="{{ route('reports.index') }}" method="GET" class="flex items-end gap-4">
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Select Date</label>
                 <input 
