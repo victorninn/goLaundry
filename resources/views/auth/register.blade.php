@@ -42,6 +42,7 @@
                     placeholder="Fresh & Clean Laundry"
                 >
             </div>
+            
 
             <div class="grid grid-cols-2 gap-4">
                 <div>

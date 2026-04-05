@@ -31,6 +31,9 @@ class BusinessController extends Controller
             'address' => 'nullable|string|max:500',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
+            'tin' => 'nullable|string|max:20',
+            'business_registration_number' => 'nullable|string|max:20',
+            'owner_name' => 'required|string|max:255',
         ]);
 
         $business->update($validated);
