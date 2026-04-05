@@ -129,7 +129,7 @@
                         <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                             <div>
                                 <p class="font-medium text-slate-800">{{ $item->service->name }}</p>
-                                <p class="text-sm text-slate-500">{{ number_format($item->kilos, 1) }} kg × ₱{{ number_format($item->price_per_kilo, 2) }}</p>
+                                <p class="text-sm text-slate-500">{{ number_format($order->total_loads, 1) }} loads × ₱{{ number_format($item->price_per_load, 2) }}</p>
                             </div>
                             <p class="font-semibold text-slate-800">₱{{ number_format($item->subtotal, 2) }}</p>
                         </div>

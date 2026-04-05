@@ -23,8 +23,8 @@
                         <p class="font-medium text-slate-800">{{ $order->date_received->format('M d, Y') }}</p>
                     </div>
                     <div>
-                        <p class="text-slate-500">Weight</p>
-                        <p class="font-medium text-slate-800">{{ number_format($order->total_kilos, 1) }} kg</p>
+                        <p class="text-slate-500">Loads</p>
+                        <p class="font-medium text-slate-800">{{ number_format($order->total_loads, 1) }}</p>
                     </div>
                     <div>
                         <p class="text-slate-500">Total</p>

@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Business Header with Logo -->
+    <!-- Business Header with Logo 
     <div class="bg-white rounded-xl border border-slate-200 p-6">
         <div class="flex items-center gap-4">
             @if($business && $business->logo_url)
@@ -31,7 +31,7 @@
                 New Order
             </a>
         </div>
-    </div>
+    </div>->
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">

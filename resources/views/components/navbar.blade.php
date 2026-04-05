@@ -31,12 +31,17 @@
 
         <div class="flex items-center gap-4">
             @unless(auth()->user()->isSuperAdmin())
+        <span class="text-sm text-gray-600">
+            {{ auth()->user()->email }}
+        </span>
+
             <a href="{{ route('orders.create') }}" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
                 <span class="font-medium">New Order</span>
             </a>
+
             @endunless
 
             <form action="{{ route('logout') }}" method="POST">

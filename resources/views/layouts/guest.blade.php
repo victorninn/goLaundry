@@ -15,7 +15,7 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-sky-50 via-white to-teal-50 min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md">
+    <div class="w-full max-w-lg">
         @yield('content')
     </div>
 </body>

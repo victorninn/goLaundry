@@ -76,7 +76,7 @@
             <div>
                 <label for="logo" class="block text-sm font-medium text-slate-700 mb-2">Logo (Optional)</label>
                 <input type="file" id="logo" name="logo" accept="image/*"
-                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none">
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-blue-50 file:text-blue-700">
                 <p class="mt-1 text-xs text-slate-500">Max 2MB. Supported: JPEG, PNG, GIF</p>
                 @error('logo')<p class="mt-1 text-sm text-rose-600">{{ $message }}</p>@enderror
             </div>
