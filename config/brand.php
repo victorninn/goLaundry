@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name'     => 'goLaundry',
-    'tagline'  => 'Track your laundry easily',
+    'name'     => 'elvic',
     'version'  => '1.0.0',
+    'logo'     => 'elvic-green.svg'
 ];
